@@ -1,8 +1,11 @@
 package portal;
 
+import com.opencsv.CSVWriter;
 import org.jsoup.Jsoup;
 
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -14,8 +17,10 @@ import java.util.stream.IntStream;
 class GitHubIssuesCrawler {
 
     void fetch(String repositoryId, String resultFilePath, Integer issuesLimit) throws IOException {
-         Path path = FileSystems.getDefault().getPath(resultFilePath);
-         Files.createDirectory(path);
+        Path path = FileSystems.getDefault().getPath(resultFilePath);
+        OutputStream os = Files.newOutputStream(path);
+        OutputStreamWriter osw = new OutputStreamWriter(os);
+        CSVWriter csvw = new CSVWriter(osw);
 
         // "page" is a list of issues
         int pagesCountToVisit = (int) Math.ceil(issuesLimit.doubleValue() / 25);
@@ -44,17 +49,14 @@ class GitHubIssuesCrawler {
                 ArrayList::addAll
         ).subList(0, issuesLimit);
 
-        List<String> comments = issuesToVisit.stream().collect(
-                ArrayList::new,
-                (result, issueToVisit) -> {
-                    try {
-                        result.addAll(Jsoup.connect(issueToVisit).get().getElementsByClass("comment-body").eachText());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                },
-                ArrayList::addAll
-        );
-
+        for (String issueToVisit : issuesToVisit) {
+            List<String> comments = Jsoup.connect(issueToVisit).get().getElementsByClass("comment-body").eachText();
+            for (String comment : comments) {
+                csvw.writeNext(new String[] {comment});
+            }
+        }
+        csvw.close();
+        osw.close();
+        os.close();
     }
 }

@@ -18,4 +18,5 @@ dependencies {
     implementation group: 'com.paralleldots', name: 'paralleldots', version: '1.0.2'
     implementation group: 'org.springframework.shell', name: 'spring-shell-starter', version: '2.0.1.RELEASE'
     implementation group: 'org.jsoup', name: 'jsoup', version: '1.12.1'
+    implementation group: 'com.opencsv', name: 'opencsv', version: '4.6'
 }
