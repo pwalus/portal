@@ -4,8 +4,6 @@ import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
 
-import java.io.IOException;
-
 @ShellComponent
 class Commands {
 
@@ -21,10 +19,6 @@ class Commands {
             @ShellOption(help = "Ścieżka do pliku, gdzie zapisać komentarze") String resultFilePath,
             @ShellOption(help = "Z ilu issues pobrać komentarze", defaultValue = "10") String issuesLimit
     ) {
-        try {
-            gitHubIssuesCrawler.fetch(repositoryId, resultFilePath, Integer.parseInt(issuesLimit));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        gitHubIssuesCrawler.fetch(repositoryId, resultFilePath, Integer.parseInt(issuesLimit));
     }
 }
