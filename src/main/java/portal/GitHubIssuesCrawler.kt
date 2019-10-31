@@ -2,6 +2,7 @@ package portal
 
 import com.opencsv.CSVWriter
 import org.jsoup.Jsoup
+import org.jsoup.nodes.Document
 import java.io.OutputStreamWriter
 import java.nio.file.FileSystems
 import java.nio.file.Files
@@ -29,8 +30,9 @@ class GitHubIssuesCrawler {
 
         csvw.writeNext(arrayOf(repositoryId))
         issuesToVisit.forEach { issueToVisit ->
-            val comments = Jsoup.connect(issueToVisit).get().getElementsByClass("comment-body").eachText()
-            csvw.writeAll(comments.map { comment -> arrayOf(comment) })
+            val comments = Jsoup.connect(issueToVisit).get().getElementsByClass("comment-body")
+            val commentsText = comments.map { comment -> comment.select("p").eachText().joinToString(" ") }
+            csvw.writeAll(commentsText.map { comment -> arrayOf(comment) })
         }
 
         csvw.close()
