@@ -15,14 +15,17 @@ public class Issue {
     private Long id;
 
     @NaturalId
-    private Long issueId;
+    private String issueId;
 
     @Column(nullable = false)
-    private Long title;
+    private String url;
+
+    @Column(nullable = false)
+    private String title;
 
     @ManyToOne
-    @JoinColumn(name = "repository_id", nullable = false)
-    private Project repository;
+    @JoinColumn(name = "project_id", nullable = false)
+    private Project project;
 
     @OneToMany(mappedBy = "issue")
     private List<Comment> comments;

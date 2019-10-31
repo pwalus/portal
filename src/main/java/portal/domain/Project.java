@@ -20,6 +20,6 @@ public class Project {
     @Column(nullable = false)
     private String url;
 
-    @OneToMany(mappedBy = "repository")
+    @OneToMany(mappedBy = "project")
     private List<Issue> issues;
 }
