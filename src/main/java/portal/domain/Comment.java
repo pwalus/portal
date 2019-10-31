@@ -1,9 +1,11 @@
 package portal.domain;
 
+import java.util.*;
 import javax.persistence.*;
 import javax.persistence.Entity;
 import lombok.*;
 import org.hibernate.annotations.*;
+import portal.domain.analysis.*;
 
 @Entity
 @Data
@@ -14,10 +16,13 @@ public class Comment {
 
     @Column(nullable = false)
     @Type(type = "text")
-
     private String content;
 
     @ManyToOne
     @JoinColumn(name = "issue_id", nullable = false)
     private Issue issue;
+
+    @OneToMany(mappedBy = "comment")
+    private List<CommentAnalysis> commentAnalysis;
+
 }

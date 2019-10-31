@@ -5,6 +5,7 @@ import java.util.*;
 import org.slf4j.*;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.stereotype.*;
+import portal.analyser.*;
 import portal.domain.*;
 import portal.repository.*;
 
@@ -21,6 +22,9 @@ public class DatabaseWriter implements Writer {
 
     @Autowired
     private CommentRepository commentRepository;
+
+    @Autowired
+    private ThreadBridge threadBridge;
 
     private Map<String, Project> projectCache = new HashMap<>();
 
@@ -55,13 +59,16 @@ public class DatabaseWriter implements Writer {
     }
 
     @Override
-    public void writeComments(String issueId, List<String> commentsText) {
-        commentsText.stream().map(comment -> {
+    public void writeComments(String issueId, List<String> comments) {
+        comments.stream().map(comment -> {
             Comment commentEntity = new Comment();
             commentEntity.setContent(EmojiParser.removeAllEmojis(comment));
             commentEntity.setIssue(getIssue(issueId));
             return commentEntity;
-        }).forEach(commentRepository::save);
+        }).forEach(commentEntity -> {
+            commentRepository.save(commentEntity);
+            threadBridge.getCommentsQueue().add(commentEntity);
+        });
     }
 
     private Issue getIssue(String issueId) throws NoSuchElementException {
