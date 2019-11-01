@@ -65,6 +65,8 @@ public class DatabaseWriter implements Writer {
             commentEntity.setContent(EmojiParser.removeAllEmojis(comment));
             commentEntity.setIssue(getIssue(issueId));
             return commentEntity;
+        }).filter(comment -> {
+            return !comment.getContent().isEmpty();
         }).forEach(commentEntity -> {
             commentRepository.save(commentEntity);
             threadBridge.getCommentsQueue().add(commentEntity);
