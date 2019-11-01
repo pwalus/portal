@@ -25,6 +25,7 @@ public class ApiService {
     }
 
     public Map<String, List<Map<String, String>>> analyse(List<Comment> comments) {
+        logger.info("Analysing comments...");
         ServiceInvoker serviceInvoker = new ServiceInvoker();
         Map<String, List<Map<String, String>>> responseMap = new HashMap<>();
         for (String analysisCode : apiConfiguration.getAnalysisCodes()) {
@@ -41,14 +42,13 @@ public class ApiService {
 
     private class ServiceInvoker {
 
-        private List<Map<String, String>> invoke(String analysisCode, List<Comment> comments)
-            throws Exception {
+        private List<Map<String, String>> invoke(String analysisCode, List<Comment> comments) throws Exception {
             App app = new App(apiConfiguration.getKey());
             JSONArray jsonArray = toJsonArray(comments);
 
             Method method = app.getClass().getDeclaredMethod(analysisCode + "_batch", JSONArray.class);
+            logger.info("Invoking " + analysisCode + "_batch method...");
             String response = (String) method.invoke(app, jsonArray);
-            logger.info(response);
 
             return parseResponse(response, analysisCode);
         }

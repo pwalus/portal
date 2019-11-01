@@ -36,7 +36,7 @@ class Commands {
         @ShellOption(help = "Z ilu issues pobrać komentarze", defaultValue = "10") String issuesLimit
     ) {
         threadManager.addTask(() -> gitHubIssuesCrawler.fetch(repositoryId, Integer.parseInt(issuesLimit), writer));
-//        threadManager.addTask(() -> commentAnalyser.analyse());
+        threadManager.addTask(() -> commentAnalyser.analyse());
         threadManager.run();
     }
 }

@@ -7,6 +7,7 @@ import portal.domain.*;
 
 @Entity
 @Data
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"code", "comment_id"}))
 public class CommentAnalysis {
 
     @Id
@@ -14,7 +15,7 @@ public class CommentAnalysis {
     private Long id;
 
     @Column(nullable = false)
-    private String analysisCode;
+    private String code;
 
     @ManyToOne
     @JoinColumn(name = "comment_id", nullable = false)
@@ -23,4 +24,12 @@ public class CommentAnalysis {
     @OneToMany(mappedBy = "commentAnalysis")
     private List<CommentAnalysisItem> commentAnalysisItems;
 
+    @Override
+    public String toString() {
+        return "CommentAnalysis{" +
+            "id=" + id +
+            ", code='" + code + '\'' +
+            ", comment=" + comment +
+            '}';
+    }
 }

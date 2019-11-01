@@ -24,7 +24,6 @@ class GitHubIssuesCrawler {
 
     private fun saveIssue(writer: Writer, repositoryId: String, repositoryUrl: String): (String) -> Unit {
         return { issueToVisit ->
-            logger.info(issueToVisit)
             val issueId = issueToVisit.replace(repositoryUrl + "issues/", "")
             val dom = Jsoup.connect(issueToVisit).get();
             val title = dom.getElementsByClass("js-issue-title").first()
@@ -33,7 +32,6 @@ class GitHubIssuesCrawler {
 
             val comments = dom.getElementsByClass("timeline-comment-group")
             val commentsMap = comments.map { comment ->
-                logger.info(comment.id())
                 val commentBody = comment.getElementsByClass("comment-body")
                 comment.id() to commentBody.select("p").eachText().joinToString(" ")
             }.toMap()

@@ -51,21 +51,34 @@ public class CommentAnalyser {
 
         try {
             while (true) {
-                comments.add(threadBridge.getCommentsQueue().poll(10, TimeUnit.SECONDS));
+                Comment comment = threadBridge.getCommentsQueue().poll(5, TimeUnit.SECONDS);
+                if (comment == null) {
+                    logger.info("Empty queue...");
+                    break;
+                }
+
+                if (isNotAnalysed(comment)) {
+                    logger.info("Comment: " + comment.getCommentId() + " not analysed...");
+                    comments.add(comment);
+                }
+
                 analyseBatch(comments, false);
             }
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            logger.info(e.getMessage());
         }
 
         analyseBatch(comments, true);
     }
 
+    private boolean isNotAnalysed(Comment comment) {
+        return comment.getCommentAnalysisList().size() <= 0;
+    }
+
     public void analyseBatch(List<Comment> comments, boolean flush) {
-        if (comments.size() > BATCH_NUMBER || flush) {
+        if (!comments.isEmpty() && (comments.size() > BATCH_NUMBER || flush)) {
             try {
                 save(comments, apiService.analyse(comments));
-                System.exit(1);
             } catch (Exception e) {
                 e.printStackTrace();
                 System.exit(1);
@@ -79,7 +92,8 @@ public class CommentAnalyser {
     ) {
         for (Map.Entry<String, List<Map<String, String>>> entry : analyseResponse.entrySet()) {
             for (int i = 0; i < comments.size(); i++) {
-                CommentAnalysis commentAnalysis = createCommentAnalysis(comments.get(i), entry.getKey());
+                CommentAnalysis commentAnalysis = createCommentAnalysis(
+                    comments.get(i), entry.getKey());
                 createCommentAnalysisItems(entry.getValue().get(i), commentAnalysis);
             }
         }
@@ -88,7 +102,7 @@ public class CommentAnalyser {
     private CommentAnalysis createCommentAnalysis(Comment comment, String analysisCode) {
         CommentAnalysis commentAnalysis = new CommentAnalysis();
         commentAnalysis.setComment(comment);
-        commentAnalysis.setAnalysisCode(analysisCode);
+        commentAnalysis.setCode(analysisCode);
         return commentAnalysisRepository.save(commentAnalysis);
     }
 

@@ -10,14 +10,15 @@ public class ThreadManager {
     private List<Runnable> tasks = new ArrayList<>();
 
     public void run() {
-        try {
-            ExecutorService executorService = Executors.newFixedThreadPool(2);
-            tasks.forEach(executorService::submit);
+        ExecutorService executorService = Executors.newFixedThreadPool(2);
 
+        try {
+            tasks.forEach(executorService::submit);
             executorService.shutdown();
             executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            executorService.shutdownNow();
+            System.out.println("System shutdown...");
         }
     }
 

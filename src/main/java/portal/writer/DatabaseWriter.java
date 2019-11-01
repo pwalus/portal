@@ -81,7 +81,7 @@ public class DatabaseWriter implements Writer {
         ).forEach(
             commentEntity -> {
                 logger.info("Saving: " + commentEntity.getCommentId());
-                commentRepository.save(commentEntity);
+                commentEntity = commentRepository.save(commentEntity);
                 threadBridge.getCommentsQueue().add(commentEntity);
             }
         );
