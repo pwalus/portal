@@ -12,7 +12,7 @@ import portal.thread.*;
 @Service
 public class DatabaseWriter implements Writer {
 
-    private Logger logger = LoggerFactory.getLogger("github-logger");
+    private Logger logger = LoggerFactory.getLogger(DatabaseWriter.class);
 
     private ProjectRepository projectRepository;
 
@@ -68,18 +68,23 @@ public class DatabaseWriter implements Writer {
     }
 
     @Override
-    public void writeComments(String issueId, List<String> comments) {
-        comments.stream().map(comment -> {
-            Comment commentEntity = new Comment();
-            commentEntity.setContent(EmojiParser.removeAllEmojis(comment));
+    public void writeComments(String issueId, Map<String, String> comments) {
+        comments.entrySet().stream().map(comment -> {
+            Comment commentEntity = getComment(comment.getKey());
+            commentEntity.setCommentId(comment.getKey());
+            commentEntity.setContent(EmojiParser.removeAllEmojis(comment.getValue()));
             commentEntity.setIssue(getIssue(issueId));
+
             return commentEntity;
-        }).filter(comment -> {
-            return !comment.getContent().isEmpty();
-        }).forEach(commentEntity -> {
-            commentRepository.save(commentEntity);
-            threadBridge.getCommentsQueue().add(commentEntity);
-        });
+        }).filter(
+            comment -> !comment.getContent().isEmpty()
+        ).forEach(
+            commentEntity -> {
+                logger.info("Saving: " + commentEntity.getCommentId());
+                commentRepository.save(commentEntity);
+                threadBridge.getCommentsQueue().add(commentEntity);
+            }
+        );
     }
 
     private Issue getIssue(String issueId) throws NoSuchElementException {
@@ -90,5 +95,10 @@ public class DatabaseWriter implements Writer {
         }
 
         return issueCache.get(issueId);
+    }
+
+    private Comment getComment(String commentId) {
+        Optional<Comment> optional = commentRepository.findByCommentId(commentId);
+        return optional.orElseGet(Comment::new);
     }
 }

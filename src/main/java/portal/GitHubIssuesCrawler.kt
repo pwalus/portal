@@ -2,7 +2,6 @@ package portal
 
 import org.jsoup.Jsoup
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import portal.writer.Writer
 import kotlin.math.ceil
@@ -32,10 +31,14 @@ class GitHubIssuesCrawler {
 
             writer.writeIssue(issueId, repositoryId, issueToVisit, title.text())
 
-            val comments = dom.getElementsByClass("comment-body")
-            val commentsText = comments.map { comment -> comment.select("p").eachText().joinToString(" ") }
+            val comments = dom.getElementsByClass("timeline-comment-group")
+            val commentsMap = comments.map { comment ->
+                logger.info(comment.id())
+                val commentBody = comment.getElementsByClass("comment-body")
+                comment.id() to commentBody.select("p").eachText().joinToString(" ")
+            }.toMap()
 
-            writer.writeComments(issueId, commentsText)
+            writer.writeComments(issueId, commentsMap)
         }
     }
 
