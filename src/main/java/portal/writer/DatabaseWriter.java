@@ -5,9 +5,9 @@ import java.util.*;
 import org.slf4j.*;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.stereotype.*;
-import portal.analyser.*;
 import portal.domain.*;
 import portal.repository.*;
+import portal.thread.*;
 
 @Service
 public class DatabaseWriter implements Writer {

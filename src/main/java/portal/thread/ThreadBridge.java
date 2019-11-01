@@ -1,4 +1,4 @@
-package portal.analyser;
+package portal.thread;
 
 import java.util.concurrent.*;
 import org.springframework.stereotype.*;

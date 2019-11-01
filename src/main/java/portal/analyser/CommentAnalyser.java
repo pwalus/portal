@@ -1,6 +1,7 @@
 package portal.analyser;
 
 import java.util.*;
+import java.util.Map.*;
 import java.util.concurrent.*;
 import org.slf4j.*;
 import org.springframework.beans.factory.annotation.*;
@@ -9,6 +10,7 @@ import portal.analyser.api.*;
 import portal.domain.*;
 import portal.domain.analysis.*;
 import portal.repository.*;
+import portal.thread.*;
 
 @Component
 public class CommentAnalyser {
@@ -22,6 +24,9 @@ public class CommentAnalyser {
 
     @Autowired
     private CommentAnalysisRepository commentAnalysisRepository;
+
+    @Autowired
+    private CommentAnalysisItemRepository commentAnalysisItemRepository;
 
     @Autowired
     private ApiService apiService;
@@ -59,15 +64,36 @@ public class CommentAnalyser {
         }
     }
 
-    private void save(List<Comment> comments, Map<String, List<String>> analyse) {
-        for (Map.Entry<String, List<String>> entry : analyse.entrySet()) {
+    private void save(List<Comment> comments, Map<String, Map<String, String>> analyse) {
+        for (Map.Entry<String, Map<String, String>> entry : analyse.entrySet()) {
             for (int i = 0; i < comments.size(); i++) {
-                CommentAnalysis commentAnalysis = new CommentAnalysis();
-                commentAnalysis.setComment(comments.get(i));
-                commentAnalysis.setJson(entry.getValue().get(i));
-                commentAnalysis.setName(entry.getKey());
-                commentAnalysisRepository.save(commentAnalysis);
+                CommentAnalysis commentAnalysis = createCommentAnalysis(comments, entry, i);
+                createCommentAnalysisItems(entry, commentAnalysis);
             }
+        }
+    }
+
+    private CommentAnalysis createCommentAnalysis(
+        List<Comment> comments,
+        Entry<String, Map<String, String>> entry,
+        int i
+    ) {
+        CommentAnalysis commentAnalysis = new CommentAnalysis();
+        commentAnalysis.setComment(comments.get(i));
+        commentAnalysis.setAnalysisCode(entry.getKey());
+        return commentAnalysisRepository.save(commentAnalysis);
+    }
+
+    private void createCommentAnalysisItems(
+        Entry<String, Map<String, String>> entry,
+        CommentAnalysis commentAnalysis
+    ) {
+        for (Entry<String, String> item : entry.getValue().entrySet()) {
+            CommentAnalysisItem commentAnalysisItem = new CommentAnalysisItem();
+            commentAnalysisItem.setCommentAnalysis(commentAnalysis);
+            commentAnalysisItem.setName(item.getKey());
+            commentAnalysisItem.setValue(item.getValue());
+            commentAnalysisItemRepository.save(commentAnalysisItem);
         }
     }
 

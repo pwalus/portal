@@ -1,4 +1,4 @@
-package portal;
+package portal.thread;
 
 import java.util.*;
 import java.util.concurrent.*;

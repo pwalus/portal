@@ -19,30 +19,32 @@ public class ApiService {
     @Autowired
     private ApiConfiguration apiConfiguration;
 
-    public Map<String, List<String>> analyse(List<Comment> comments) throws Exception {
+    public Map<String, Map<String, String>> analyse(List<Comment> comments) throws Exception {
         App app = new App(apiConfiguration.getKey());
         JSONArray jsonArray = toJsonArray(comments);
         String response = app.sentiment_batch(jsonArray);
         logger.info(response);
 
-        Map<String, List<String>> responseMap = new HashMap<>();
+        Map<String, Map<String, String>> responseMap = new HashMap<>();
         responseMap.put("sentiment", parseResponse(response));
 
         return responseMap;
     }
 
-    private List<String> parseResponse(String response) throws ParseException {
+    @SuppressWarnings("unchecked")
+    private Map<String, String> parseResponse(String response) throws ParseException {
         JSONParser jsonParser = new JSONParser();
         JSONObject jsonObject = (JSONObject) jsonParser.parse(response);
         JSONArray jsonArray = (JSONArray) jsonObject.get("sentiment");
         Iterator iterator = jsonArray.iterator();
 
-        List<String> jsonContent = new ArrayList<>();
+        Map<String, String> objectMap = new HashMap<>();
         while (iterator.hasNext()) {
-            jsonContent.add(iterator.next().toString());
+            JSONObject itemArray = (JSONObject) iterator.next();
+            itemArray.forEach((o, o2) -> objectMap.put(o.toString(), o2.toString()));
         }
 
-        return jsonContent;
+        return objectMap;
     }
 
 

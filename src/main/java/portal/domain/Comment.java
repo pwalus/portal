@@ -1,8 +1,8 @@
 package portal.domain;
 
 import java.util.*;
-import javax.persistence.*;
 import javax.persistence.Entity;
+import javax.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.*;
 import portal.domain.analysis.*;
@@ -10,6 +10,7 @@ import portal.domain.analysis.*;
 @Entity
 @Data
 public class Comment {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -23,6 +24,6 @@ public class Comment {
     private Issue issue;
 
     @OneToMany(mappedBy = "comment")
-    private List<CommentAnalysis> commentAnalysis;
+    private List<CommentAnalysis> commentAnalysisList;
 
 }

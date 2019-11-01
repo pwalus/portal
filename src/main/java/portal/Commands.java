@@ -3,6 +3,7 @@ package portal;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.shell.standard.*;
 import portal.analyser.*;
+import portal.thread.*;
 import portal.writer.*;
 
 @ShellComponent
