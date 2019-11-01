@@ -9,17 +9,26 @@ import portal.writer.*;
 @ShellComponent
 class Commands {
 
-    @Autowired
     private GitHubIssuesCrawler gitHubIssuesCrawler;
 
-    @Autowired
     private Writer writer;
 
-    @Autowired
     private CommentAnalyser commentAnalyser;
 
-    @Autowired
     private ThreadManager threadManager;
+
+    @Autowired
+    Commands(
+        GitHubIssuesCrawler gitHubIssuesCrawler,
+        Writer writer,
+        CommentAnalyser commentAnalyser,
+        ThreadManager threadManager
+    ) {
+        this.gitHubIssuesCrawler = gitHubIssuesCrawler;
+        this.writer = writer;
+        this.commentAnalyser = commentAnalyser;
+        this.threadManager = threadManager;
+    }
 
     @ShellMethod("Pobiera komentarze z podanego repozytorium GitHub i zapisuje do bazy danych. Podczas przetwarzania inny wątek pobiera nowo powstałe wpisy i je analizuje")
     public void crawlGitHub(

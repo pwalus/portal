@@ -1,6 +1,7 @@
 package portal.analyser.api;
 
 import com.paralleldots.paralleldots.*;
+import java.lang.reflect.*;
 import java.util.*;
 import org.json.simple.*;
 import org.json.simple.parser.*;
@@ -16,45 +17,70 @@ public class ApiService {
 
     private final Logger logger = LoggerFactory.getLogger(CommentAnalyser.class);
 
-    @Autowired
     private ApiConfiguration apiConfiguration;
 
-    public Map<String, Map<String, String>> analyse(List<Comment> comments) throws Exception {
-        App app = new App(apiConfiguration.getKey());
-        JSONArray jsonArray = toJsonArray(comments);
-        String response = app.sentiment_batch(jsonArray);
-        logger.info(response);
+    @Autowired
+    public ApiService(ApiConfiguration apiConfiguration) {
+        this.apiConfiguration = apiConfiguration;
+    }
 
-        Map<String, Map<String, String>> responseMap = new HashMap<>();
-        responseMap.put("sentiment", parseResponse(response));
+    public Map<String, List<Map<String, String>>> analyse(List<Comment> comments) {
+        ServiceInvoker serviceInvoker = new ServiceInvoker();
+        Map<String, List<Map<String, String>>> responseMap = new HashMap<>();
+        for (String analysisCode : apiConfiguration.getAnalysisCodes()) {
+            try {
+                List<Map<String, String>> response = serviceInvoker.invoke(analysisCode, comments);
+                responseMap.put(analysisCode, response);
+            } catch (Exception exception) {
+                exception.printStackTrace();
+            }
+        }
 
         return responseMap;
     }
 
-    @SuppressWarnings("unchecked")
-    private Map<String, String> parseResponse(String response) throws ParseException {
-        JSONParser jsonParser = new JSONParser();
-        JSONObject jsonObject = (JSONObject) jsonParser.parse(response);
-        JSONArray jsonArray = (JSONArray) jsonObject.get("sentiment");
-        Iterator iterator = jsonArray.iterator();
+    private class ServiceInvoker {
 
-        Map<String, String> objectMap = new HashMap<>();
-        while (iterator.hasNext()) {
-            JSONObject itemArray = (JSONObject) iterator.next();
-            itemArray.forEach((o, o2) -> objectMap.put(o.toString(), o2.toString()));
+        private List<Map<String, String>> invoke(String analysisCode, List<Comment> comments)
+            throws Exception {
+            App app = new App(apiConfiguration.getKey());
+            JSONArray jsonArray = toJsonArray(comments);
+
+            Method method = app.getClass().getDeclaredMethod(analysisCode + "_batch", JSONArray.class);
+            String response = (String) method.invoke(app, jsonArray);
+            logger.info(response);
+
+            return parseResponse(response, analysisCode);
         }
 
-        return objectMap;
-    }
+        @SuppressWarnings("unchecked")
+        private List<Map<String, String>> parseResponse(String response, String analysisCode)
+            throws ParseException {
+            JSONParser jsonParser = new JSONParser();
+            JSONObject jsonObject = (JSONObject) jsonParser.parse(response);
+            JSONArray jsonArray = (JSONArray) jsonObject.get(analysisCode);
+            Iterator iterator = jsonArray.iterator();
+
+            List<Map<String, String>> objectList = new ArrayList<>();
+            while (iterator.hasNext()) {
+                Map<String, String> objectMap = new HashMap<>();
+                JSONObject itemArray = (JSONObject) iterator.next();
+                itemArray.forEach((o, o2) -> objectMap.put(o.toString(), o2.toString()));
+                objectList.add(objectMap);
+            }
+
+            return objectList;
+        }
 
 
-    @SuppressWarnings("unchecked")
-    private JSONArray toJsonArray(List<Comment> comments) {
-        JSONArray jsonArray = new JSONArray();
-        comments.stream()
-            .map(Comment::getContent)
-            .forEach(jsonArray::add);
+        @SuppressWarnings("unchecked")
+        private JSONArray toJsonArray(List<Comment> comments) {
+            JSONArray jsonArray = new JSONArray();
+            comments.stream()
+                .map(Comment::getContent)
+                .forEach(jsonArray::add);
 
-        return jsonArray;
+            return jsonArray;
+        }
     }
 }

@@ -14,21 +14,30 @@ public class DatabaseWriter implements Writer {
 
     private Logger logger = LoggerFactory.getLogger("github-logger");
 
-    @Autowired
     private ProjectRepository projectRepository;
 
-    @Autowired
     private IssueRepository issueRepository;
 
-    @Autowired
     private CommentRepository commentRepository;
 
-    @Autowired
     private ThreadBridge threadBridge;
 
     private Map<String, Project> projectCache = new HashMap<>();
 
     private Map<String, Issue> issueCache = new HashMap<>();
+
+    @Autowired
+    public DatabaseWriter(
+        ProjectRepository projectRepository,
+        IssueRepository issueRepository,
+        CommentRepository commentRepository,
+        ThreadBridge threadBridge
+    ) {
+        this.projectRepository = projectRepository;
+        this.issueRepository = issueRepository;
+        this.commentRepository = commentRepository;
+        this.threadBridge = threadBridge;
+    }
 
     @Override
     public void writeProject(String repositoryId, String repositoryUrl) {

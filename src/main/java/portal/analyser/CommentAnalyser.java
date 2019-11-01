@@ -19,17 +19,26 @@ public class CommentAnalyser {
 
     private final Logger logger = LoggerFactory.getLogger(CommentAnalyser.class);
 
-    @Autowired
     private ThreadBridge threadBridge;
 
-    @Autowired
     private CommentAnalysisRepository commentAnalysisRepository;
 
-    @Autowired
     private CommentAnalysisItemRepository commentAnalysisItemRepository;
 
-    @Autowired
     private ApiService apiService;
+
+    @Autowired
+    public CommentAnalyser(
+        ThreadBridge threadBridge,
+        CommentAnalysisRepository commentAnalysisRepository,
+        CommentAnalysisItemRepository commentAnalysisItemRepository,
+        ApiService apiService
+    ) {
+        this.threadBridge = threadBridge;
+        this.commentAnalysisRepository = commentAnalysisRepository;
+        this.commentAnalysisItemRepository = commentAnalysisItemRepository;
+        this.apiService = apiService;
+    }
 
     public void analyse() {
         logger.info("Waiting for comments to analyze...");
@@ -64,31 +73,30 @@ public class CommentAnalyser {
         }
     }
 
-    private void save(List<Comment> comments, Map<String, Map<String, String>> analyse) {
-        for (Map.Entry<String, Map<String, String>> entry : analyse.entrySet()) {
+    private void save(
+        List<Comment> comments,
+        Map<String, List<Map<String, String>>> analyseResponse
+    ) {
+        for (Map.Entry<String, List<Map<String, String>>> entry : analyseResponse.entrySet()) {
             for (int i = 0; i < comments.size(); i++) {
-                CommentAnalysis commentAnalysis = createCommentAnalysis(comments, entry, i);
-                createCommentAnalysisItems(entry, commentAnalysis);
+                CommentAnalysis commentAnalysis = createCommentAnalysis(comments.get(i), entry.getKey());
+                createCommentAnalysisItems(entry.getValue().get(i), commentAnalysis);
             }
         }
     }
 
-    private CommentAnalysis createCommentAnalysis(
-        List<Comment> comments,
-        Entry<String, Map<String, String>> entry,
-        int i
-    ) {
+    private CommentAnalysis createCommentAnalysis(Comment comment, String analysisCode) {
         CommentAnalysis commentAnalysis = new CommentAnalysis();
-        commentAnalysis.setComment(comments.get(i));
-        commentAnalysis.setAnalysisCode(entry.getKey());
+        commentAnalysis.setComment(comment);
+        commentAnalysis.setAnalysisCode(analysisCode);
         return commentAnalysisRepository.save(commentAnalysis);
     }
 
     private void createCommentAnalysisItems(
-        Entry<String, Map<String, String>> entry,
+        Map<String, String> commentResponse,
         CommentAnalysis commentAnalysis
     ) {
-        for (Entry<String, String> item : entry.getValue().entrySet()) {
+        for (Entry<String, String> item : commentResponse.entrySet()) {
             CommentAnalysisItem commentAnalysisItem = new CommentAnalysisItem();
             commentAnalysisItem.setCommentAnalysis(commentAnalysis);
             commentAnalysisItem.setName(item.getKey());
