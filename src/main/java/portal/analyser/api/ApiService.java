@@ -52,7 +52,7 @@ public class ApiService {
 
             if(response.contains("You have exceeded the rate limit")){
                 logger.info("You have exceeded the rate limit of daily api usage");
-                System.exit(1);
+                return new ArrayList<>();
             }
 
             logger.info(response);
