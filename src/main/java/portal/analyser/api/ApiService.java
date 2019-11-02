@@ -50,6 +50,13 @@ public class ApiService {
             logger.info("Invoking " + analysisCode + "_batch method...");
             String response = (String) method.invoke(app, jsonArray);
 
+            if(response.contains("You have exceeded the rate limit")){
+                logger.info("You have exceeded the rate limit of daily api usage");
+                System.exit(1);
+            }
+
+            logger.info(response);
+
             return parseResponse(response, analysisCode);
         }
 

@@ -27,6 +27,8 @@ public class CommentAnalyser {
 
     private ApiService apiService;
 
+    private List<Comment> comments = new ArrayList<>();
+
     @Autowired
     public CommentAnalyser(
         ThreadBridge threadBridge,
@@ -47,11 +49,9 @@ public class CommentAnalyser {
     }
 
     private void consumeQueue() {
-        List<Comment> comments = new ArrayList<>();
-
         try {
             while (true) {
-                Comment comment = threadBridge.getCommentsQueue().poll(5, TimeUnit.SECONDS);
+                Comment comment = threadBridge.getCommentsQueue().poll(10, TimeUnit.SECONDS);
                 if (comment == null) {
                     logger.info("Empty queue...");
                     break;
@@ -62,23 +62,24 @@ public class CommentAnalyser {
                     comments.add(comment);
                 }
 
-                analyseBatch(comments, false);
+                analyseBatch(false);
             }
         } catch (InterruptedException e) {
             logger.info(e.getMessage());
         }
 
-        analyseBatch(comments, true);
+        analyseBatch(true);
     }
 
     private boolean isNotAnalysed(Comment comment) {
         return comment.getCommentAnalysisList().size() <= 0;
     }
 
-    public void analyseBatch(List<Comment> comments, boolean flush) {
+    public void analyseBatch(boolean flush) {
         if (!comments.isEmpty() && (comments.size() > BATCH_NUMBER || flush)) {
             try {
-                save(comments, apiService.analyse(comments));
+                save(apiService.analyse(comments));
+                comments = new ArrayList<>();
             } catch (Exception e) {
                 e.printStackTrace();
                 System.exit(1);
@@ -86,14 +87,10 @@ public class CommentAnalyser {
         }
     }
 
-    private void save(
-        List<Comment> comments,
-        Map<String, List<Map<String, String>>> analyseResponse
-    ) {
+    private void save(Map<String, List<Map<String, String>>> analyseResponse) {
         for (Map.Entry<String, List<Map<String, String>>> entry : analyseResponse.entrySet()) {
             for (int i = 0; i < comments.size(); i++) {
-                CommentAnalysis commentAnalysis = createCommentAnalysis(
-                    comments.get(i), entry.getKey());
+                CommentAnalysis commentAnalysis = createCommentAnalysis(comments.get(i), entry.getKey());
                 createCommentAnalysisItems(entry.getValue().get(i), commentAnalysis);
             }
         }
