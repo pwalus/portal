@@ -7,6 +7,7 @@ import org.slf4j.*;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.stereotype.*;
 import portal.analyser.api.*;
+import portal.analyser.api.configuration.*;
 import portal.domain.*;
 import portal.domain.analysis.*;
 import portal.repository.*;
@@ -27,6 +28,8 @@ public class CommentAnalyser {
 
     private ApiService apiService;
 
+    private ApiConfiguration apiConfiguration;
+
     private List<Comment> comments = new ArrayList<>();
 
     @Autowired
@@ -34,12 +37,14 @@ public class CommentAnalyser {
         ThreadBridge threadBridge,
         CommentAnalysisRepository commentAnalysisRepository,
         CommentAnalysisItemRepository commentAnalysisItemRepository,
-        ApiService apiService
+        ApiService apiService,
+        ApiConfiguration apiConfiguration
     ) {
         this.threadBridge = threadBridge;
         this.commentAnalysisRepository = commentAnalysisRepository;
         this.commentAnalysisItemRepository = commentAnalysisItemRepository;
         this.apiService = apiService;
+        this.apiConfiguration = apiConfiguration;
     }
 
     public void analyse() {
@@ -72,13 +77,15 @@ public class CommentAnalyser {
     }
 
     private boolean isNotAnalysed(Comment comment) {
-        return comment.getCommentAnalysisList().size() <= 0;
+        return commentAnalysisRepository.countByCommentId(comment.getId()) < 1;
     }
 
     public void analyseBatch(boolean flush) {
         if (!comments.isEmpty() && (comments.size() > BATCH_NUMBER || flush)) {
             try {
-                save(apiService.analyse(comments));
+                for (String analysisCode : apiConfiguration.getAnalysisCodes()) {
+                    save(apiService.analyse(comments, analysisCode), analysisCode);
+                }
                 comments = new ArrayList<>();
             } catch (Exception e) {
                 e.printStackTrace();
@@ -87,12 +94,14 @@ public class CommentAnalyser {
         }
     }
 
-    private void save(Map<String, List<Map<String, String>>> analyseResponse) {
-        for (Map.Entry<String, List<Map<String, String>>> entry : analyseResponse.entrySet()) {
-            for (int i = 0; i < comments.size(); i++) {
-                CommentAnalysis commentAnalysis = createCommentAnalysis(comments.get(i), entry.getKey());
-                createCommentAnalysisItems(entry.getValue().get(i), commentAnalysis);
-            }
+    private void save(List<Map<String, String>> analyseResponse, String analysisCode) {
+        if (analyseResponse.isEmpty()) {
+            System.exit(1);
+        }
+
+        for (int i = 0; i < comments.size(); i++) {
+            CommentAnalysis commentAnalysis = createCommentAnalysis(comments.get(i), analysisCode);
+            createCommentAnalysisItems(analyseResponse.get(i), commentAnalysis);
         }
     }
 

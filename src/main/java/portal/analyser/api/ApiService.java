@@ -24,25 +24,22 @@ public class ApiService {
         this.apiConfiguration = apiConfiguration;
     }
 
-    public Map<String, List<Map<String, String>>> analyse(List<Comment> comments) {
+    public List<Map<String, String>> analyse(List<Comment> comments, String analysisCode) {
         logger.info("Analysing comments...");
         ServiceInvoker serviceInvoker = new ServiceInvoker();
-        Map<String, List<Map<String, String>>> responseMap = new HashMap<>();
-        for (String analysisCode : apiConfiguration.getAnalysisCodes()) {
-            try {
-                List<Map<String, String>> response = serviceInvoker.invoke(analysisCode, comments);
-                responseMap.put(analysisCode, response);
-            } catch (Exception exception) {
-                exception.printStackTrace();
-            }
+        try {
+            return serviceInvoker.invoke(analysisCode, comments);
+        } catch (Exception exception) {
+            exception.printStackTrace();
         }
 
-        return responseMap;
+        return new ArrayList<>();
     }
 
     private class ServiceInvoker {
 
-        private List<Map<String, String>> invoke(String analysisCode, List<Comment> comments) throws Exception {
+        private List<Map<String, String>> invoke(String analysisCode, List<Comment> comments)
+            throws Exception {
             App app = new App(apiConfiguration.getKey());
             JSONArray jsonArray = toJsonArray(comments);
 
@@ -50,7 +47,7 @@ public class ApiService {
             logger.info("Invoking " + analysisCode + "_batch method...");
             String response = (String) method.invoke(app, jsonArray);
 
-            if(response.contains("You have exceeded the rate limit")){
+            if (response.contains("You have exceeded the rate limit")) {
                 logger.info("You have exceeded the rate limit of daily api usage");
                 return new ArrayList<>();
             }

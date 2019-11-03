@@ -7,4 +7,6 @@ import portal.domain.analysis.*;
 @Repository
 public interface CommentAnalysisRepository extends JpaRepository<CommentAnalysis, Long> {
 
+    public long countByCommentId(Long commentId);
+
 }

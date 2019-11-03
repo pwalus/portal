@@ -26,7 +26,7 @@ public class Comment {
     @JoinColumn(name = "issue_id", nullable = false)
     private Issue issue;
 
-    @OneToMany(mappedBy = "comment", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "comment")
     private List<CommentAnalysis> commentAnalysisList;
 
 }
