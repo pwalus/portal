@@ -3,6 +3,7 @@ package portal.analyser.api;
 import com.paralleldots.paralleldots.*;
 import java.lang.reflect.*;
 import java.util.*;
+import java.util.concurrent.*;
 import org.json.simple.*;
 import org.json.simple.parser.*;
 import org.slf4j.*;
@@ -38,17 +39,25 @@ public class ApiService {
 
     private class ServiceInvoker {
 
-        private List<Map<String, String>> invoke(String analysisCode, List<Comment> comments)
-            throws Exception {
+        private List<Map<String, String>> invoke(String analysisCode, List<Comment> comments) throws Exception {
             App app = new App(apiConfiguration.getKey());
             JSONArray jsonArray = toJsonArray(comments);
 
-            Method method = app.getClass().getDeclaredMethod(analysisCode + "_batch", JSONArray.class);
+            Method method = app.getClass()
+                .getDeclaredMethod(analysisCode + "_batch", JSONArray.class);
             logger.info("Invoking " + analysisCode + "_batch method...");
             String response = (String) method.invoke(app, jsonArray);
 
             if (response.contains("You have exceeded the rate limit")) {
                 logger.info("You have exceeded the rate limit of daily api usage");
+                logger.info("Waiting one minute...");
+                TimeUnit.MINUTES.sleep(1);
+                response = (String) method.invoke(app, jsonArray);
+            }
+
+            if (response.contains("Daily Limit Exceeded")) {
+                logger.info("Daily Limit Exceeded");
+
                 return new ArrayList<>();
             }
 
