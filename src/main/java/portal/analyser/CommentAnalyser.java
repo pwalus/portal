@@ -16,7 +16,7 @@ import portal.thread.*;
 @Component
 public class CommentAnalyser {
 
-    public static final int BATCH_NUMBER = 5;
+    public static final int BATCH_NUMBER = 10;
 
     private final Logger logger = LoggerFactory.getLogger(CommentAnalyser.class);
 
@@ -56,7 +56,7 @@ public class CommentAnalyser {
     private void consumeQueue() {
         try {
             while (true) {
-                Comment comment = threadBridge.getCommentsQueue().poll(10, TimeUnit.SECONDS);
+                Comment comment = threadBridge.getCommentsQueue().poll(30, TimeUnit.SECONDS);
                 if (comment == null) {
                     logger.info("Empty queue...");
                     break;
