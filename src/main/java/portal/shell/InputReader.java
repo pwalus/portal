@@ -8,11 +8,11 @@ public class InputReader {
 
     public static final Character DEFAULT_MASK = '*';
 
-    private ShellHelper shellHelper;
+    private final ShellHelper shellHelper;
 
-    private Character mask;
+    private final Character mask;
 
-    private LineReader lineReader;
+    private final LineReader lineReader;
 
     public InputReader(LineReader lineReader, ShellHelper shellHelper) {
         this(lineReader, shellHelper, null);
@@ -22,6 +22,7 @@ public class InputReader {
         this.lineReader = lineReader;
         this.shellHelper = shellHelper;
         this.mask = mask != null ? mask : DEFAULT_MASK;
+        Objects.requireNonNull(shellHelper);
     }
 
     public String prompt(String prompt) {
@@ -57,7 +58,7 @@ public class InputReader {
         if (defaultValue != null && !defaultValue.equals("")) {
             allowedAnswers.add("");
         }
-        shellHelper.print(String.format("%s: ", headingMessage));
+        shellHelper.printInfo(String.format("%s: ", headingMessage));
         do {
             for (Map.Entry<String, String> option : options.entrySet()) {
                 String defaultMarker = null;
@@ -70,8 +71,7 @@ public class InputReader {
                     shellHelper.printInfo(String
                         .format("%s [%s] %s ", defaultMarker, option.getKey(), option.getValue()));
                 } else {
-                    shellHelper
-                        .print(String.format("  [%s] %s", option.getKey(), option.getValue()));
+                    shellHelper.printWarning(String.format("  [%s] %s", option.getKey(), option.getValue()));
                 }
             }
             answer = lineReader.readLine(String.format("%s: ", promptMessage));

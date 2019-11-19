@@ -2,26 +2,16 @@ package portal.shell;
 
 import org.jline.terminal.*;
 import org.jline.utils.*;
-import org.springframework.beans.factory.annotation.*;
 
 public class ShellHelper {
 
-    @Value("${shell.out.info}")
-    public String infoColor;
+    private final Terminal terminal;
 
-    @Value("${shell.out.success}")
-    public String successColor;
+    private final ShellColorConfig shellColorConfig;
 
-    @Value("${shell.out.warning}")
-    public String warningColor;
-
-    @Value("${shell.out.error}")
-    public String errorColor;
-
-    private Terminal terminal;
-
-    public ShellHelper(Terminal terminal) {
+    public ShellHelper(Terminal terminal, ShellColorConfig shellColorConfig) {
         this.terminal = terminal;
+        this.shellColorConfig = shellColorConfig;
     }
 
     public String getColored(String message, PromptColor color) {
@@ -31,19 +21,19 @@ public class ShellHelper {
     }
 
     public String getInfoMessage(String message) {
-        return getColored(message, PromptColor.valueOf(infoColor));
+        return getColored(message, PromptColor.valueOf(shellColorConfig.info));
     }
 
     public String getSuccessMessage(String message) {
-        return getColored(message, PromptColor.valueOf(successColor));
+        return getColored(message, PromptColor.valueOf(shellColorConfig.success));
     }
 
     public String getWarningMessage(String message) {
-        return getColored(message, PromptColor.valueOf(warningColor));
+        return getColored(message, PromptColor.valueOf(shellColorConfig.warning));
     }
 
     public String getErrorMessage(String message) {
-        return getColored(message, PromptColor.valueOf(errorColor));
+        return getColored(message, PromptColor.valueOf(shellColorConfig.error));
     }
 
     /**
@@ -61,7 +51,7 @@ public class ShellHelper {
      * @param message message to print
      */
     public void printSuccess(String message) {
-        print(message, PromptColor.valueOf(successColor));
+        print(message, PromptColor.valueOf(shellColorConfig.success));
     }
 
     /**
@@ -70,7 +60,7 @@ public class ShellHelper {
      * @param message message to print
      */
     public void printInfo(String message) {
-        print(message, PromptColor.valueOf(infoColor));
+        print(message, PromptColor.valueOf(shellColorConfig.info));
     }
 
     /**
@@ -79,7 +69,7 @@ public class ShellHelper {
      * @param message message to print
      */
     public void printWarning(String message) {
-        print(message, PromptColor.valueOf(warningColor));
+        print(message, PromptColor.valueOf(shellColorConfig.warning));
     }
 
     /**
@@ -88,7 +78,7 @@ public class ShellHelper {
      * @param message message to print
      */
     public void printError(String message) {
-        print(message, PromptColor.valueOf(errorColor));
+        print(message, PromptColor.valueOf(shellColorConfig.error));
     }
 
     /**
