@@ -79,6 +79,9 @@ public class InputReader {
         if (StringUtils.isEmpty(answer) && allowedAnswers.contains("")) {
             return defaultValue;
         }
+
+        shellHelper.printInfo("");
+
         return answer;
     }
 
