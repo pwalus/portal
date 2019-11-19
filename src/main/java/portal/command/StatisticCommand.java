@@ -1,4 +1,4 @@
-package portal;
+package portal.command;
 
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.shell.standard.*;
@@ -7,7 +7,7 @@ import portal.shell.chooser.*;
 import portal.statistic.*;
 
 @ShellComponent
-public class StatisticsCommand {
+public class StatisticCommand {
 
     private final ShellHelper shellHelper;
 
@@ -19,26 +19,35 @@ public class StatisticsCommand {
 
     private final PrintStatistic printStatistics;
 
+    private final PrintAllStatistics printAllStatistics;
+
     @Autowired
-    public StatisticsCommand(
+    public StatisticCommand(
         ShellHelper shellHelper,
         InputReader inputReader,
         ProjectChooser projectChooser,
         AnalysisMethodChooser analysisMethodChooser,
-        PrintStatistic printStatistics
+        PrintStatistic printStatistics,
+        PrintAllStatistics printAllStatistics
     ) {
         this.shellHelper = shellHelper;
         this.inputReader = inputReader;
         this.projectChooser = projectChooser;
         this.analysisMethodChooser = analysisMethodChooser;
         this.printStatistics = printStatistics;
+        this.printAllStatistics = printAllStatistics;
     }
 
-    @ShellMethod("Runs statistics by user input")
-    public void run() {
+    @ShellMethod(value = "Runs statistic by user input", key = "statistic:for:project")
+    public void statisticForProject() {
         Long projectId = projectChooser.chooseProject();
         String method = analysisMethodChooser.chooseMethod();
         printStatistics.printFor(projectId, method);
+    }
+
+    @ShellMethod(value = "Print all statistics", key = "statistic:all")
+    public void allStatistics() {
+        printAllStatistics.print();
     }
 
 }

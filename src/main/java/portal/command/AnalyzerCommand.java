@@ -1,7 +1,8 @@
-package portal;
+package portal.command;
 
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.shell.standard.*;
+import portal.*;
 import portal.analyser.*;
 import portal.thread.*;
 import portal.writer.*;

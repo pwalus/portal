@@ -34,23 +34,21 @@ public class PrintStatistic {
 
         TableModel tableModel = new ArrayTableModel(array);
         TableBuilder tableBuilder = new TableBuilder(tableModel);
-
         tableBuilder.addFullBorder(BorderStyle.oldschool);
         shellHelper.print(tableBuilder.build().render(80));
     }
 
-    private List<Statistic> getStatisticList(Long projectId, String analysisMethod) {
+    public List<Statistic> getStatisticList(Long projectId, String analysisMethod) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Statistic> query = criteriaBuilder.createQuery(Statistic.class);
 
         Root<CommentAnalysisItem> root = query.from(CommentAnalysisItem.class);
-        Join<CommentAnalysisItem, CommentAnalysis> commentsAnalysisJoin = root
-            .join(CommentAnalysisItem_.commentAnalysis);
-        Join<CommentAnalysis, Comment> commentsJoin = commentsAnalysisJoin
-            .join(CommentAnalysis_.comment);
+        Join<CommentAnalysisItem, CommentAnalysis> commentsAnalysisJoin = root.join(CommentAnalysisItem_.commentAnalysis);
+        Join<CommentAnalysis, Comment> commentsJoin = commentsAnalysisJoin.join(CommentAnalysis_.comment);
         Join<Comment, Issue> issueJoin = commentsJoin.join(Comment_.issue);
         Join<Issue, Project> projectJoin = issueJoin.join(Issue_.project);
 
+        query.orderBy(criteriaBuilder.asc(root.get(CommentAnalysisItem_.NAME)));
         query.groupBy(root.get(CommentAnalysisItem_.name));
         query.where(
             criteriaBuilder.equal(projectJoin.get(Project_.id), projectId),
