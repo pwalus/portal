@@ -41,6 +41,8 @@ public class PrintAllStatistics {
             Map<String, List<Statistic>> allStatistics = new HashMap<>();
             int maxRows = 0;
             for (Project project : projects) {
+                shellHelper.printWarning(project.getRepositoryId() + " : " + printStatistic.getCount(project.getId(), code).toString());
+
                 List<Statistic> statistics = printStatistic.getStatisticList(project.getId(), code);
                 maxRows = statistics.size();
                 allStatistics.put(

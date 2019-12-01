@@ -1,14 +1,30 @@
 package portal.statistic;
 
-import java.util.*;
-import javax.persistence.*;
-import javax.persistence.criteria.*;
-import org.springframework.beans.factory.annotation.*;
-import org.springframework.shell.table.*;
-import org.springframework.stereotype.*;
-import portal.domain.*;
-import portal.domain.analysis.*;
-import portal.shell.*;
+import java.util.List;
+import javax.persistence.EntityManager;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.shell.table.ArrayTableModel;
+import org.springframework.shell.table.BorderStyle;
+import org.springframework.shell.table.TableBuilder;
+import org.springframework.shell.table.TableModel;
+import org.springframework.stereotype.Component;
+import portal.domain.Comment;
+import portal.domain.Comment_;
+import portal.domain.Issue;
+import portal.domain.Issue_;
+import portal.domain.Project;
+import portal.domain.Project_;
+import portal.domain.analysis.CommentAnalysis;
+import portal.domain.analysis.CommentAnalysisItem;
+import portal.domain.analysis.CommentAnalysisItem_;
+import portal.domain.analysis.CommentAnalysis_;
+import portal.shell.ShellHelper;
 
 @Component
 public class PrintStatistic {
@@ -59,6 +75,28 @@ public class PrintStatistic {
         query.multiselect(root.get(CommentAnalysisItem_.NAME), avg);
 
         return entityManager.createQuery(query).getResultList();
+    }
+
+    public Long getCount(Long projectId, String analysisMethod) {
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Long> query = criteriaBuilder.createQuery(Long.class);
+
+        Root<CommentAnalysis> root = query.from(CommentAnalysis.class);
+        Join<CommentAnalysis, Comment> commentsJoin = root.join(CommentAnalysis_.comment);
+        Join<Comment, Issue> issueJoin = commentsJoin.join(Comment_.issue);
+        Join<Issue, Project> projectJoin = issueJoin.join(Issue_.project);
+
+        query.select(
+            criteriaBuilder.count(
+                root.get(CommentAnalysis_.id)
+            )
+        );
+        query.where(
+            criteriaBuilder.equal(projectJoin.get(Project_.id), projectId),
+            criteriaBuilder.equal(root.get(CommentAnalysis_.code), analysisMethod)
+        );
+
+        return entityManager.createQuery(query).getSingleResult();
     }
 
 }

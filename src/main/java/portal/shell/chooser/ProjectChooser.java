@@ -1,12 +1,12 @@
 package portal.shell.chooser;
 
-import java.util.*;
-import java.util.stream.*;
-import org.springframework.beans.factory.annotation.*;
-import org.springframework.stereotype.*;
-import portal.domain.*;
-import portal.repository.*;
-import portal.shell.*;
+import java.util.Map;
+import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import portal.domain.Project;
+import portal.repository.ProjectRepository;
+import portal.shell.InputReader;
 
 @Component
 public class ProjectChooser {
@@ -38,5 +38,9 @@ public class ProjectChooser {
             );
 
         return Long.valueOf(projectValue);
+    }
+
+    public Project chooseProject(Long projectId) {
+        return projectRepository.getOne(projectId);
     }
 }

@@ -1,7 +1,9 @@
 package portal.command;
 
+import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.shell.standard.*;
+import portal.domain.Project;
 import portal.shell.*;
 import portal.shell.chooser.*;
 import portal.statistic.*;
@@ -39,9 +41,13 @@ public class StatisticCommand {
     }
 
     @ShellMethod(value = "Runs statistic by user input", key = "statistic:for:project")
+    @Transactional
     public void statisticForProject() {
         Long projectId = projectChooser.chooseProject();
+        Project project = projectChooser.chooseProject(projectId);
         String method = analysisMethodChooser.chooseMethod();
+
+        shellHelper.printWarning(project.getRepositoryId() + " : " + printStatistics.getCount(projectId, method).toString());
         printStatistics.printFor(projectId, method);
     }
 
