@@ -28,4 +28,5 @@ dependencies {
 
     annotationProcessor('org.hibernate:hibernate-jpamodelgen:5.4.7.Final')
     testImplementation 'org.springframework.boot:spring-boot-starter-test:2.1.8.RELEASE'
+    testCompile group: 'com.h2database', name: 'h2', version: '1.4.200'
 }
