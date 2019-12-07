@@ -22,7 +22,6 @@ import portal.repository.ProjectRepository;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
-@Transactional
 public class ProjectRepositoryTest {
 
     @Autowired
