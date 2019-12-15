@@ -1,12 +1,19 @@
 package portal.statistic;
 
-import java.util.*;
-import org.springframework.shell.table.*;
-import org.springframework.stereotype.*;
-import portal.analyser.api.configuration.*;
-import portal.domain.*;
-import portal.repository.*;
-import portal.shell.*;
+import java.text.NumberFormat;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import org.springframework.format.number.PercentStyleFormatter;
+import org.springframework.shell.table.ArrayTableModel;
+import org.springframework.shell.table.BorderStyle;
+import org.springframework.shell.table.TableBuilder;
+import org.springframework.shell.table.TableModel;
+import org.springframework.stereotype.Component;
+import portal.analyser.api.configuration.ApiConfiguration;
+import portal.domain.Project;
+import portal.repository.ProjectRepository;
+import portal.shell.ShellHelper;
 
 @Component
 public class PrintAllStatistics {
@@ -41,7 +48,8 @@ public class PrintAllStatistics {
             Map<String, List<Statistic>> allStatistics = new HashMap<>();
             int maxRows = 0;
             for (Project project : projects) {
-                shellHelper.printWarning(project.getRepositoryId() + " : " + printStatistic.getCount(project.getId(), code).toString());
+                Long count = printStatistic.getCount(project.getId(), code);
+                shellHelper.printWarning(project.getRepositoryId() + " : " + count.toString());
 
                 List<Statistic> statistics = printStatistic.getStatisticList(project.getId(), code);
                 maxRows = statistics.size();
@@ -69,8 +77,12 @@ public class PrintAllStatistics {
             for (Project project : projects) {
                 int x = 1;
                 List<Statistic> statistics = allStatistics.get(project.getRepositoryId());
+                if (statistics == null) {
+                    continue;
+                }
+                NumberFormat numberFormat = NumberFormat.getPercentInstance();
                 for (Statistic statistic : statistics) {
-                    array[x][y] = String.valueOf(statistic.getValue());
+                    array[x][y] = numberFormat.format(statistic.getValue());
                     x++;
                 }
                 y++;
@@ -79,7 +91,7 @@ public class PrintAllStatistics {
             TableModel tableModel = new ArrayTableModel(array);
             TableBuilder tableBuilder = new TableBuilder(tableModel);
             tableBuilder.addFullBorder(BorderStyle.oldschool);
-            shellHelper.print(tableBuilder.build().render(80));
+            shellHelper.print(tableBuilder.build().render(40));
         }
     }
 }

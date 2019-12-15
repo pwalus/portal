@@ -1,5 +1,6 @@
 package portal.statistic;
 
+import java.text.NumberFormat;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -43,9 +44,10 @@ public class PrintStatistic {
         List<Statistic> statistics = getStatisticList(projectId, analysisMethod);
         String[][] array = new String[statistics.size()][2];
 
+        NumberFormat numberFormat = NumberFormat.getPercentInstance();
         for (int i = 0; i < statistics.size(); i++) {
             array[i][0] = statistics.get(i).getName();
-            array[i][1] = String.valueOf(statistics.get(i).getValue());
+            array[i][1] = numberFormat.format(statistics.get(i).getValue());
         }
 
         TableModel tableModel = new ArrayTableModel(array);
