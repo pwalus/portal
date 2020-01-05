@@ -4,7 +4,6 @@ import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.springframework.format.number.PercentStyleFormatter;
 import org.springframework.shell.table.ArrayTableModel;
 import org.springframework.shell.table.BorderStyle;
 import org.springframework.shell.table.TableBuilder;
@@ -52,7 +51,7 @@ public class PrintAllStatistics {
                 shellHelper.printWarning(project.getRepositoryId() + " : " + count.toString());
 
                 List<Statistic> statistics = printStatistic.getStatisticList(project.getId(), code);
-                maxRows = statistics.size();
+                maxRows = Integer.max(maxRows, statistics.size());
                 allStatistics.put(
                     project.getRepositoryId(),
                     statistics
