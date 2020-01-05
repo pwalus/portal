@@ -21,7 +21,7 @@ public class CommentAnalysis {
     @JoinColumn(name = "comment_id", nullable = false)
     private Comment comment;
 
-    @OneToMany(mappedBy = "commentAnalysis")
+    @OneToMany(mappedBy = "commentAnalysis", cascade = CascadeType.ALL)
     private List<CommentAnalysisItem> commentAnalysisItems;
 
     @Override

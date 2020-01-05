@@ -2,6 +2,7 @@ package portal.domain;
 
 import java.util.*;
 import javax.persistence.*;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import lombok.*;
 import org.hibernate.annotations.*;
@@ -20,6 +21,6 @@ public class Project {
     @Column(nullable = false)
     private String url;
 
-    @OneToMany(mappedBy = "project")
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL)
     private List<Issue> issues;
 }

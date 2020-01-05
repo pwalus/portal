@@ -1,6 +1,7 @@
 package portal.domain;
 
 import java.util.*;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.*;
 import lombok.*;
@@ -26,7 +27,7 @@ public class Comment {
     @JoinColumn(name = "issue_id", nullable = false)
     private Issue issue;
 
-    @OneToMany(mappedBy = "comment")
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL)
     private List<CommentAnalysis> commentAnalysisList;
 
 }
